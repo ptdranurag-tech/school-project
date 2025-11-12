@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { getUserFromToken } from '../utiles/Auth'
-import DashboardLayout from '../component/DashboardLayout'
+import DashboardLayout from '../Component/DashboardLayout'
 
 const Teacher = () => {
   const user = getUserFromToken()
