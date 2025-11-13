@@ -1,10 +1,11 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getUserFromToken } from "../utiles/Auth";
 import DashboardLayout from "../Component/DashboardLayout";
 import { Routes, Route } from "react-router-dom";
 import School from "./School";
+import ViewAllEmergencyDialog from "@/Dialogs/ViewAllEmergencyDialog";
+import PrincipalManagement from "./Principal_OwnerPage";
 
 const OwnerDashboard = () => {
   const [school, setSchool] = useState(null);
@@ -16,6 +17,8 @@ const OwnerDashboard = () => {
     student: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog state
+
   const user = getUserFromToken();
 
   useEffect(() => {
@@ -47,6 +50,7 @@ const OwnerDashboard = () => {
     fetchData();
   }, []);
 
+  // Dashboard Home Component
   const DashboardHome = () => (
     <div className="space-y-8">
       {/* Header */}
@@ -62,29 +66,64 @@ const OwnerDashboard = () => {
         </div>
       </div>
 
-      {/* Total Summary Cards (owner removed) */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {[
-          { label: "Principal", value: totals.principal, color: "from-blue-500 to-indigo-500", icon: "👔" },
-          { label: "Vice Principal", value: totals.vicePrincipal, color: "from-teal-500 to-emerald-500", icon: "🧑‍💼" },
-          { label: "Management", value: totals.management, color: "from-purple-500 to-indigo-500", icon: "🏢" },
-          { label: "Teachers", value: totals.teacher, color: "from-indigo-500 to-purple-500", icon: "👨‍🏫" },
-          { label: "Students", value: totals.student, color: "from-pink-500 to-rose-500", icon: "🎓" },
-        ].map((item, index) => (
-          <div
-            key={index}
-            className={`relative bg-gradient-to-br ${item.color} text-white rounded-2xl shadow-xl p-6 hover:scale-105 transition-all duration-300 overflow-hidden`}
-          >
-            <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="relative z-10 flex items-center space-x-4">
-              <span className="text-4xl">{item.icon}</span>
-              <div>
-                <p className="text-sm uppercase tracking-wide text-white/80">{item.label}</p>
-                <p className="text-3xl font-bold">{item.value}</p>
-              </div>
+      {/* Emergency Alert Box */}
+      <section>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+          <span className="text-3xl">📢</span>
+          <span>Emergency Notice</span>
+        </h2>
+
+        <div
+          onClick={() => setIsDialogOpen(true)}
+          className="cursor-pointer bg-gradient-to-br from-red-500 to-rose-500 text-white rounded-2xl shadow-xl p-6 hover:scale-105 transition-all duration-300"
+        >
+          <div className="flex items-center space-x-4">
+            {/* <span className="text-4xl"></span> */}
+             <span>📢</span> {/* Notice emoji */}
+            <div>
+              <p className="text-lg font-semibold">View All Emergency Notice</p>
+              <p className="text-sm text-white/80">Click to see details</p>
             </div>
           </div>
-        ))}
+        </div>
+      </section>
+
+      {/* Dialog */}
+      <ViewAllEmergencyDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
+
+      {/* Total Summary Section */}
+      <section>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+          <span className="text-3xl">📊</span>
+          <span>Total Staff Summary</span>
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {[
+            { label: "Principal", value: totals.principal, color: "from-blue-500 to-indigo-500", icon: "👔" },
+            { label: "Vice Principal", value: totals.vicePrincipal, color: "from-teal-500 to-emerald-500", icon: "🧑‍💼" },
+            { label: "Management", value: totals.management, color: "from-purple-500 to-indigo-500", icon: "🏢" },
+            { label: "Teachers", value: totals.teacher, color: "from-indigo-500 to-purple-500", icon: "👨‍🏫" },
+            { label: "Students", value: totals.student, color: "from-pink-500 to-rose-500", icon: "🎓" },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className={`relative bg-gradient-to-br ${item.color} text-white rounded-2xl shadow-xl p-6 hover:scale-105 transition-all duration-300 overflow-hidden`}
+            >
+              <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex items-center space-x-4">
+                <span className="text-4xl">{item.icon}</span>
+                <div>
+                  <p className="text-sm uppercase tracking-wide text-white/80">{item.label}</p>
+                  <p className="text-3xl font-bold">{item.value}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* School Overview */}
@@ -133,6 +172,7 @@ const OwnerDashboard = () => {
       <Routes>
         <Route path="/" element={<DashboardHome />} />
         <Route path="school" element={<School />} />
+        <Route path="/principals" element={<PrincipalManagement/>}/>
       </Routes>
     </DashboardLayout>
   );

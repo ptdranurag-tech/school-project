@@ -1,5 +1,5 @@
 import { School } from "../model/SchoolSchema.js";
-import {GetInTouch} from '../model/getInTouchContact.js'
+import { GetInTouch } from '../model/getInTouchContact.js'
 import { Event } from "../model/EventSchema.js";
 import { EmergencyNotice } from "../model/EmergencyNoticeSchema.js";
 import UserSchema from "../model/UserSchema.js";
@@ -128,14 +128,14 @@ export const getLatestContact = async (req, res) => {
   try {
     const latestContact = await GetInTouch.findOne()
       .sort({ createdAt: -1 });
-    
+
     if (!latestContact) {
       return res.status(404).json({
         success: false,
         message: "No contacts found"
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: latestContact
@@ -156,15 +156,15 @@ export const getLatestContact = async (req, res) => {
 export const getAllContact = async (req, res) => {
   try {
     const latestContact = await GetInTouch.find()
-      
-    
+
+
     if (!latestContact) {
       return res.status(404).json({
         success: false,
         message: "No contacts found"
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: latestContact
@@ -368,13 +368,13 @@ export const createEmergencyNoticeController = async (req, res) => {
 
 
 
-export const TotalStaffInWholeSchoolController = async (req,res)=>{
+export const TotalStaffInWholeSchoolController = async (req, res) => {
 
   try {
-    
 
 
-        const TotalStaff = await UserSchema.find({ role: { $ne: 'owner' } }).select("-password");
+
+    const TotalStaff = await UserSchema.find({ role: { $ne: 'owner' } }).select("-password");
 
     if (!TotalStaff) {
       return res.status(404).json({
@@ -389,7 +389,7 @@ export const TotalStaffInWholeSchoolController = async (req,res)=>{
       TotalStaff,
     });
   } catch (error) {
-   
+
     console.error("❌ Error creating total staff whole school controller:", error.message);
     res.status(500).json({
       success: false,
@@ -397,5 +397,316 @@ export const TotalStaffInWholeSchoolController = async (req,res)=>{
       error: error.message,
     });
   }
-  }
+}
 
+
+export const ViewAllEmergencyNotice = async (req, res) => {
+  try {
+    const TotalEmergencyNotice = await EmergencyNotice.find();
+
+    if (!TotalEmergencyNotice || TotalEmergencyNotice.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No notices found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Total notices found successfully",
+      TotalEmergencyNotice,
+    });
+  } catch (error) {
+    console.error("❌ Error total Emergency notice controller:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch emergency notices.",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
+// controllers/emergencyNoticeController.js
+
+// import EmergencyNotice from "../models/EmergencyNotice.js";
+
+// ✅ Update Emergency Notice by ID
+export const updateEmergencyNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, category, roles, expiryDate } = req.body;
+
+    // Validate required fields
+    // if (!title || !description || !category) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Title, description, and category are required fields",
+    //   });
+    // }
+
+    // Check if notice exists
+    const existingNotice = await EmergencyNotice.findById(id);
+    if (!existingNotice) {
+      return res.status(404).json({
+        success: false,
+        message: "Emergency notice not found",
+      });
+    }
+
+    // Update the notice
+    const updatedNotice = await EmergencyNotice.findByIdAndUpdate(
+      id,
+      {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        roles: roles || [],
+        expiryDate: expiryDate || null,
+      },
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Run mongoose validations
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Emergency notice updated successfully",
+      notice: updatedNotice,
+    });
+
+  } catch (error) {
+    console.error("❌ Error updating emergency notice:", error.message);
+    
+    // Handle validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Validation error",
+        error: error.message,
+      });
+    }
+
+    // Handle invalid ID format
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid notice ID format",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update emergency notice",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
+// controllers/emergencyNoticeController.js
+
+// import EmergencyNotice from "../models/EmergencyNotice.js";
+
+// ✅ Delete Emergency Notice by ID
+export const deleteEmergencyNotice = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if notice exists
+    const existingNotice = await EmergencyNotice.findById(id);
+    
+    if (!existingNotice) {
+      return res.status(404).json({
+        success: false,
+        message: "Emergency notice not found",
+      });
+    }
+
+    // Delete the notice
+    await EmergencyNotice.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Emergency notice deleted successfully",
+      deletedNotice: {
+        id: existingNotice._id,
+        title: existingNotice.title,
+      },
+    });
+
+  } catch (error) {
+    console.error("❌ Error deleting emergency notice:", error.message);
+
+    // Handle invalid ID format
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid notice ID format",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete emergency notice",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
+// controllers/staffController.js
+// controllers/staffController.js
+// import UserSchema from "../models/UserSchema.js"; // Your User model import
+import bcrypt from "bcryptjs";
+
+export const updateStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, password, role } = req.body;
+
+    console.log("📝 Update Request:", { id, name, email, role }); // Debug log
+
+    // Validation
+    if (!name || !email || !role) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and role are required",
+      });
+    }
+
+    // Validate role
+    const validRoles = ["principal", "vicePrincipal", "management", "teacher", "student"];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role specified",
+      });
+    }
+
+    // Check if user exists
+    const existingUser = await UserSchema.findById(id);
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    // Build update object
+    const updateData = {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      role: role,
+    };
+
+    // Only update password if provided
+    if (password && password.trim()) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    console.log("🔄 Updating with data:", updateData); // Debug log
+
+    // Update staff member
+    const updatedStaff = await UserSchema.findByIdAndUpdate(
+      id,
+      updateData,
+      { 
+        new: true, 
+        runValidators: true 
+      }
+    ).select("-password");
+
+    console.log("✅ Updated successfully:", updatedStaff); // Debug log
+
+    res.status(200).json({
+      success: true,
+      message: `Staff updated successfully. Role changed to ${role}`,
+      staff: updatedStaff,
+    });
+
+  } catch (error) {
+    console.error("❌ Error updating staff:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update staff",
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+// controllers/staffController.js
+// import UserSchema from "../models/UserSchema.js";
+
+// ✅ Delete Staff/Principal
+export const deleteStaff = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log("🗑️ Delete Request for ID:", id); // Debug log
+
+    // Check if staff member exists
+    const existingStaff = await UserSchema.findById(id);
+    
+    if (!existingStaff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff member not found",
+      });
+    }
+
+    // Prevent deletion of owner role (optional security check)
+    if (existingStaff.role === "owner") {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot delete owner account",
+      });
+    }
+
+    // Delete the staff member
+    await UserSchema.findByIdAndDelete(id);
+
+    console.log("✅ Staff deleted successfully:", existingStaff.name); // Debug log
+
+    res.status(200).json({
+      success: true,
+      message: "Staff deleted successfully",
+      deletedStaff: {
+        id: existingStaff._id,
+        name: existingStaff.name,
+        email: existingStaff.email,
+        role: existingStaff.role,
+      },
+    });
+
+  } catch (error) {
+    console.error("❌ Error deleting staff:", error.message);
+
+    // Handle invalid MongoDB ID format
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid staff ID format",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete staff",
+      error: error.message,
+    });
+  }
+};

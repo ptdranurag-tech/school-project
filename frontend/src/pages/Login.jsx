@@ -37,41 +37,6 @@ const Login = () => {
   //       const userRole = decoded?.role;
 
   //       setStatus("Login successful!");
-
-  //       // ✅ Role-based navigation
-  //       switch (userRole) {
-  //         case "owner":
-  //           navigate("/owner-dashboard");
-  //           break;
-  //         case "principal":
-  //           navigate("/principal-dashboard");
-  //           break;
-  //         case "vicePrincipal":
-  //           navigate("/vice-principal-dashboard");
-  //           break;
-  //         case "management":
-  //           navigate("/management-dashboard");
-  //           break;
-  //         case "teacher":
-  //           navigate("/teacher-dashboard");
-  //           break;
-  //         case "student":
-  //           navigate("/student-dashboard");
-  //           break;
-  //         default:
-  //           navigate("/");
-  //           break;
-  //       }
-  //     } else {
-  //       setStatus("Invalid credentials!");
-  //     }
-  //   } catch (error) {
-  //     console.error("Login error:", error);
-  //     setStatus(error.response?.data?.message || "Login failed. Try again!");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
